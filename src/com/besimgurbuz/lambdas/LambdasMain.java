@@ -2,13 +2,12 @@ package com.besimgurbuz.lambdas;
 
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.function.IntPredicate;
-import java.util.function.IntToDoubleFunction;
-import java.util.function.ObjLongConsumer;
-import java.util.function.Predicate;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.*;
 
 /**
  * @author Besim Gurbuz
@@ -42,6 +41,33 @@ public class LambdasMain {
         r.run();
     }
 
+    public static class Student {
+        private int id;
+        private String name;
+
+        public Student() {}
+
+        public Student(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
 //    public static void main(String[] args) {
 //        process(r1);
@@ -91,6 +117,47 @@ public class LambdasMain {
         Predicate<Integer> oddNumbers = (Integer i) -> i % 2 != 0;
         oddNumbers.test(1000); // Boxing happened
 
-    }
+        // T -> R > Function<T, R>
+        // (int, int) -> int > IntBinaryOperator
+        // T -> void > Consumer<T>
+        // () -> T > Supplier<T>
+        // (T, U) -> R > BiFunction<T, U, R>
 
+        Predicate<List<String>> stringPredicate = (List<String> list) -> list.isEmpty();
+        Supplier<String> stringSupplier = () -> "My supplier";
+        Consumer<String> stringConsumer = (String str) -> System.out.println(str.substring(0, 4));
+        Function<String, Integer> stringIntegerFunction = (String s) -> s.length(); // Could be ToIntFunction<String>
+        IntBinaryOperator intBinaryOperator = (int a, int b) -> a * b;
+        Comparator<String> stringComparator = (String s1, String s2) -> s1.substring(0, 2).compareTo(s2.substring(0, 2)); // Could be BiFunction<String, String, Integer>, ToIntBiFunction<String, String>
+
+        // If you need the body of a lambda expression to throw an exception: define your own
+        // func.interface that declares the checked exception, or wrap the lambda body with
+        // a try/catch block
+
+        Function<BufferedReader, String> f =
+                (BufferedReader b) -> {
+                    try {
+                        return b.readLine();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+        // Using Local Variables
+        int portNumber = 3000;
+        Runnable runnable = () -> System.out.println(portNumber);
+        //portNumber = 4500;
+        runnable.run();
+        /*
+         *  Restrictions on Local Variables
+         * You may be asking yourself why local variables have these restrictions. First, there's
+         * a key difference in how instance and local variables are implemented behind the scenes.
+         * Instance variables are stored on the heap, whereas local variables live on the stack. If
+         * a lambda could access the local variable directly and the lambda was used in a thread,
+         * then the thread using the lambda could try to access the variable after the thread that
+         * allocated the variable had deallocated it. Hence, Java implements access to a free local
+         * variable as access to a copy of it, rather than access to the original variable. This
+         * makes no difference if the local variable is assigned to only once - hence the
+         * restriction.
+         */
+    }
 }

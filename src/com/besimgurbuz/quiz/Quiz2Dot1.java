@@ -1,6 +1,7 @@
 package com.besimgurbuz.quiz;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -76,7 +77,6 @@ public class Quiz2Dot1 {
         inventory.add(new Apple(200, Color.RED));
         inventory.add(new Apple(120, Color.RED));
         inventory.add(new Apple(230, Color.GREEN));
-
         prettyPrintApple(inventory, new AppleFancyFormatter());
         prettyPrintApple(inventory, (a) -> "An apple color of " + a.getColor());
 

@@ -18,5 +18,7 @@ public class PredicatePractices {
 
         System.out.println(result);
         System.out.println(predicate3.test("MY_STRIN"));
+
+
     }
 }
