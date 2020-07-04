@@ -1,5 +1,7 @@
 package com.besimgurbuz.streams;
 
+import com.besimgurbuz.models.Dish;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -40,41 +42,6 @@ public class StreamsPractice {
      *  * Internal iteration - In contrast to collections, which iterated explicitly using an
      *  iterator, stream operations do the iteration behind the scenes for you.
      */
-
-
-    public static class Dish {
-        private final String name;
-        private final boolean vegetarian;
-        private final int calories;
-        private final Type type;
-
-        public Dish(String name, boolean vegetarian, int calories, Type type) {
-            this.name = name;
-            this.vegetarian = vegetarian;
-            this.calories = calories;
-            this.type = type;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public boolean isVegetarian() {
-            return vegetarian;
-        }
-
-        public int getCalories() {
-            return calories;
-        }
-
-        public Type getType() {
-            return type;
-        }
-
-        public static enum Type {
-            MEAT, OTHER, FISH
-        }
-    }
 
     public static void main(String[] args) {
         List<Dish> menu = Arrays.asList(
@@ -195,6 +162,6 @@ public class StreamsPractice {
             * A chain of intermediate operations that form a stream pipeline
             * A terminal operation that executes the stream pipeline and produces a result
          */
-        
+
     }
 }
