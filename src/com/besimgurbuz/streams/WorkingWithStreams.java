@@ -2,6 +2,7 @@ package com.besimgurbuz.streams;
 
 import com.besimgurbuz.models.Dish;
 
+import javax.swing.text.html.Option;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -276,7 +277,58 @@ public class WorkingWithStreams {
                 .findAny()
                 .ifPresent(dish1 -> System.out.println(dish1.getName()));
 
+        /*
+        Finding the first element
 
+        Some streams have an encounter order that specifies the order in which items logically
+        appear in the stream (for example, a stream generated from a List or from a sorted sequence
+        of data). For such streams you may wish to find the first element. There's the findFirst
+        method for this which works similarly to findAny (for example, the code that follows, given
+        a list of numbers, finds the first square that's divisible by 3.)
+         */
+
+        List<Integer>  someNumbers = Arrays.asList(1, 2, 3, 4, 5);
+        Optional<Integer> firstSquareDivisibleByThree =
+                someNumbers.stream()
+                        .map(i -> i * i)
+                        .filter(square -> square % 3 == 0)
+                        .findFirst();
+        firstSquareDivisibleByThree.ifPresent(System.out::println);
+
+        /*
+        When to use findFirst and findAny
+
+        You may wonder why we have both findFirst and findAny. The answer is parallelism. Finding
+        the first element is more constraining in parallel. If you don't care about which eleemnt
+        is returned, use findAny because it's less constraining when using parallel streams.
+         */
+
+        // Reducing
+        /*
+        Reduce using in such queries combine all the elements in the stream repeatedly to produce
+        a single value such as an Integer. These queries can be classified as reduction operations
+        (a stream is reduces to a value). In functional programming-language jargon, this referred
+        to as a fold because you can view this operation as repeatedly folding a long piece of
+        paper (your stream) until it forms a small square, which is the result of the fold
+        operation.
+         */
+        int sum = someNumbers.stream().reduce(0, (s, i) -> s + i);
+        System.out.println(sum);
+
+        // Without initial value Reduce
+        // There's also an overloaded variant of reduce that doesn't take an initial value, but it
+        // returns an Optional object:
+        Optional<Integer> sumOptional = numbers.stream().reduce((a, b) -> (a + b));
+
+        // Maximum and minimum
+        int maximumNumber = someNumbers.stream().reduce(0, (max, b) -> b > max ? b : max);
+        System.out.println(maximumNumber);
+        // With method reference and Optional
+        Optional<Integer> max = someNumbers.stream().reduce(Integer::max);
+        max.ifPresent(System.out::println);
+
+        Optional<Integer> min = someNumbers.stream().reduce(Integer::min);
+        min.ifPresent(System.out::println);
 
     }
 }
