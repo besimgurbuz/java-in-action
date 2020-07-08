@@ -330,5 +330,47 @@ public class WorkingWithStreams {
         Optional<Integer> min = someNumbers.stream().reduce(Integer::min);
         min.ifPresent(System.out::println);
 
+        int sumParallel = numbers.parallelStream().reduce(0, Integer::sum);
+        System.out.println(sumParallel);
+        /*
+        But there's a price to pay to execute this code in parallel, as we'll explain later: the
+        lambda passed to reduce can't change state (for example, instance variables), and the
+        operations needs to be associative and commutative so it can be executed in any order.
+         */
+
+        /*
+        Stream Operations: Stateless vs. Stateful
+
+        You've seen a lot of stream operations. An initial presentation can make them seem a
+        panacea. Everything works smoothly, and you get parallelism for free when you use
+        parallelStream instead of stream to get a stream from a collection.
+
+        Certainly for many applications this is the case, as you've seen in the previous examples.
+        You can turn a list of dishes into a stream, filter to select various dishes of a certain
+        type, then map down the resulting stream to add on the number of calories, and then reduce
+        to produce the total number of calories of the menu. You can even do such stream
+        calculations in parallel. But these operations have different characteristics. There are
+        issues about what internal state they need to operate.
+
+        Operations like map and filter take each element form the input stream and produce zero or
+        one result in the output stream. These operations are in general stateless: they don't have
+        an internal state (assuming the user-supplied lambda or method reference has no internal
+        mutable state).
+
+        But operations like reduce, sum and max need to have internal state to accumulate the
+        result. In this case the internal state is small. In our example it consisted of an int
+        or double. The internal state is of bounded size no matter how many elements are in the
+        stream being processed.
+
+        By constant, some operations such as sorted or distinct seem at first to behave like filter
+        or map-all take a stream and produce another stream (an intermediate operation)-but there's
+        a crucial difference. Both sorting and removing duplicates from a stream require knowing
+        the previous history of to do their job. For example, sorting requires all the elements to
+        be buffered before a single item can be added to the output stream; the storage
+        requirement of the operation is unbounded. This can be problematic if the data stream is
+        large or infinite. (What should reversing the stream of all prime numbers do? It should
+        return the largest prime number, which mathematics tells us doesn't exist.) We call these
+        operations stateful operations.
+         */
     }
 }
