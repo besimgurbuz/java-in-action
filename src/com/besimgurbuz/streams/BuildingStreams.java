@@ -5,6 +5,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -114,6 +116,86 @@ public class BuildingStreams {
         Stream.iterate(0, n -> n + 2)
                 .limit(10)
                 .forEach(System.out::println);
+        /*
+        The iterate method takes an initial value, here 0, and a lambda (of type UnaryOperator<T>)
+        to apply successively on each new value produced. Here you return the previous element
+        added with 2 using the lambda n -> n + 2. As a result, the iterate method produces a stream
+        of all even numbers: the first element of the stream is the initial value 0. Then it adds
+        2 to produce the new value 2; it adds 2 again and produce the new value 4 an so on. This
+        iterate operation is fundamentally sequential because the result depends on the previous
+        application. Note that this operation produces an infinite stream-the stream doesn't have
+        an end because values are computed on demand and can be computed forever. We say the stream
+        is unbounded. As we discussed earlier, this is a key difference between a stream and a
+        collection. You're using the limit method to explicitly limit the size of the stream. Here
+        you select only the first 10 even numbers. You then call the forEach terminal operation to
+        consume the stream and print each element individually.
 
+        In general, you should use iterate when you need to produce a sequence of successive values
+        (for example, a date followed by its next date: January 31, February 1, and so on).
+         */
+
+        // Fibonacci
+        Stream.iterate(new int[]{0, 1}, v -> new int[] { v[1],  v[0] + v[1]})
+                .limit(20)
+                .forEach(t -> System.out.println("(" + t[0] + "," + t[1] + ")"));
+
+        /*
+        In Java 9, the iterate method was enhanced with support for a predicate. For example, you
+        can generate numbers starting at 0 but stop the iteration once the number is greater than
+        100:
+         */
+        IntStream.iterate(0, n -> n < 100, n -> n + 4)
+                .forEach(System.out::println);
+        /*
+        The iterate method takes a predicate as its second argument that tells you when to continue
+        iterating up until. Note that you may think that you can use the filter operation to
+        achieve the same result:
+
+            IntStream.iterate(0, n -> n + 4)
+                    .filter(n -> n < 100)
+                    .forEach(System.out::println);
+
+        Unfortunately that isn't the case. In fact, this code wouldn't terminate! The reason is
+        that there's no way to know in the filter that numbers continue to increase, so it keeps
+        on filtering them infinitely! You could solve the problem by using takeWhile, which would
+        short-circuit the stream:
+        */
+        IntStream.iterate(0, n -> n + 4)
+                .takeWhile(n -> n < 100)
+                .forEach(System.out::println);
+
+        // Generate
+        /*
+        Similarly to method iterate, the method generate lets you produce an infinite stream of
+        values computed on demand. But generate doesn't apply successively a function on each new
+        produced value. It takes a lambda of type Supplier<T> to provide new values. Let's look at
+        an example how to use it:
+         */
+        Stream.generate(Math::random)
+                .limit(5)
+                .forEach(System.out::println);
+
+        DoubleStream.generate(Math::random)
+                .limit(10)
+                .forEach(System.out::println);
+        /*
+        The static method Math.random is used as generator for new values. Again you limit the size
+        of the stream explicitly using the limit method; otherwise the stream would be unbounded!
+
+        You may be wondering whether there's anything else useful you can do using the method
+        generate. The supplier we used (a method reference to Math.random) was stateless: is
+        wasn't recording any values somewhere that can be used in later computations. But a
+        supplier doesn't have to be stateless. You can create a supplier that stores state that it
+        can modify and use when generating the next value of the stream.
+
+        But it's important to note that a supplier that's stateful isn't safe to use parallel code.
+        The stateful IntSupplier for Fibonacci is shown at the end of this chapter for completeness
+        but should generally be avoided!
+
+        We'll use an IntStream in our example to illustrate code that's designed to avoid boxing
+        operations. The generate method on IntStream takes an IntSupplier instead of a Supplier<T>
+        For example, here's how to generate an infinite stream of ones:
+         */
+        IntStream ones = IntStream.generate(() -> 1);
     }
 }
