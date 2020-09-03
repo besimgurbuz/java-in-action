@@ -212,7 +212,7 @@ public class WorkingWithStreamsNumeric {
                                 .mapToObj(b ->
                                         new int[]{a, b, (int) Math.sqrt(a*a + b*b)}));
         /*
-        Okey, what's the flatMap about? First, you create a numeric range from 1 to 100 to generate
+        Ok, what's the flatMap about? First, you create a numeric range from 1 to 100 to generate
         values for a. For each given value of a you're creating a stream of triples. Mapping a
         value of a to a stream of triples would result in stream of streams! The flatMap method
         does the mapping and also flattens all the generated streams of triples into a single

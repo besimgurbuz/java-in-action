@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.function.IntSupplier;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -82,8 +83,7 @@ public class BuildingStreams {
             uniqueWords = lines.flatMap(line -> Arrays.stream(line.split(" ")))
                     .distinct()
                     .count();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println(e);
         }
         System.out.println(uniqueWords);
@@ -197,5 +197,41 @@ public class BuildingStreams {
         For example, here's how to generate an infinite stream of ones:
          */
         IntStream ones = IntStream.generate(() -> 1);
+
+        /*
+        To come back to our Fibonacci tasks, what you need to do now is create an Int-Supplier
+        that maintains in its state the previous value in the series, so getAsInt can use it to
+        calculate the next element. In addition, it can update the state of the IntSupplierfor the
+        next time it’s called. The following code shows how to create an IntSupplierthat will
+        return the next Fibonacci element when it’s called:
+         */
+        IntSupplier fib = new IntSupplier() {
+            private int previous = 0;
+            private int current = 1;
+            public int getAsInt() {
+                int oldPrevious = this.previous;
+                int nextValue = this.previous + this.current;
+                this.previous = this.current;
+                this.current = nextValue;
+                return oldPrevious;
+            }
+        };
+
+        /*
+        The code creates an instance of IntSupplier. This object has a mutable state: it tracks the
+        previous Fibonacci element and the current Fibonacci element in two instance variables.
+        The getAsInt method changes the state of the object when it's called so was purely
+        immutable; you didn't modify existing state but were creating new tuples at each
+        iteration. You'll learn in chapter 7 that you should always prefer an immutable approach
+        in order to precess a stream in parallel an expect a correct result.
+
+        Note that because you're dealing with a stream of infinite size, you have to limit its
+        size explicitly using the operation limit; otherwise, the terminal operation (in this case
+        forEach) will compute forever. Similarly, you can't sort or reduce an infinite stream
+        because all elements need to be precessed, but this would take forever because the stream
+        contains an infinite number of elements!
+         */
+
+        IntStream.generate(fib).limit(10).forEach(System.out::println);
     }
 }

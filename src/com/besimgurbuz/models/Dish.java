@@ -24,6 +24,13 @@ public class Dish {
         return vegetarian;
     }
 
+    @Override
+    public String toString() {
+        return "Dish{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+
     public int getCalories() {
         return calories;
     }
