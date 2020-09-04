@@ -3,6 +3,7 @@ package com.besimgurbuz.collection;
 import com.besimgurbuz.models.Dish;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -110,6 +111,38 @@ public class CollectionPartitioning {
          */
 
         // partitioning numbers into prime and non-prime.
-        IntStream.range(0,100).
+
+        Predicate<Integer> isPrime = number -> {
+            return IntStream.range(2, number).noneMatch(i -> number % i == 0);
+        };
+
+        Map<Boolean, List<Integer>> primes = IntStream.range(2,100).boxed().collect(partitioningBy(isPrime));
+
+        System.out.println(primes);
+
+        Map<Boolean, List<Integer>> bookPrimeSolution = partitioningPrimes(100);
+
+        System.out.println(bookPrimeSolution);
     }
+
+    // books solution to the prime partitioning
+    /*
+    Suppose you want to write a method accepting as argument an int n and partitioning the
+    first n naturel numbers into prime and non-prime. But first, it will be useful to develop
+    a predicate that tests to see if a given candidate numbers is prime or not:
+     */
+    public static boolean isPrime(int candidate) {
+       return IntStream.range(2, candidate)
+                .noneMatch(i -> candidate % i == 0);
+    }
+    /*
+    Now the biggest part of the job is done. To partition the first n numbers into prime and
+    non-prime, it's enough to create a stream containing those n numbers, and reduce it with a
+    partitioningBy collector using a predicate the isPrime method you just develop:
+     */
+    public static Map<Boolean, List<Integer>> partitioningPrimes(int n) {
+        return IntStream.rangeClosed(2, n).boxed()
+                .collect(partitioningBy(number -> isPrime(number)));
+    }
+
 }
