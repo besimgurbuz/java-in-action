@@ -8,7 +8,7 @@ import java.util.stream.LongStream;
 /**
  * @author Besim Gurbuz
  */
-public class Main {
+public class ForkJoinMain {
     /*
     The fork/join framework was designed to recursively split a parallelizable task into smaller tasks
     and then combine the results of each subtask to produce the overall result. It's an implementation

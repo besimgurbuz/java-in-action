@@ -1,13 +1,10 @@
 package com.besimgurbuz.paralleldataprocessing;
 
-import com.besimgurbuz.forkjoin.Main;
+import com.besimgurbuz.forkjoin.ForkJoinMain;
 import org.openjdk.jmh.annotations.*;
 
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 /**
  * @author Besim Gurbuz
@@ -52,7 +49,7 @@ public class ParallelStreamBenchmark {
 
     @Benchmark
     public long forkJoinSumCalculator() {
-        return Main.forkJoinSum(N);
+        return ForkJoinMain.forkJoinSum(N);
     }
 
     @Benchmark
