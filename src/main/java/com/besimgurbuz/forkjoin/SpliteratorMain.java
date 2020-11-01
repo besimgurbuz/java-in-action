@@ -1,7 +1,10 @@
 package com.besimgurbuz.forkjoin;
 
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Besim Gurbuz
@@ -61,10 +64,6 @@ public class SpliteratorMain {
     final static String SENTENCE = " Nel   mezzo del cammin  di nostra  vita " +
             "mi  ritrovai in una  selva oscura" +
             " ché la  dritta via era   smarrita ";
-    public static void main(String[] args) {
-        System.out.println("Found " + countWordsIteratively(SENTENCE) + " words");
-        System.out.println("Found " + countWords(stream) + " words: Stream<Character>");
-    }
 
     /*
     Note that we added some additional random spaces in the sentence to demonstrate that the iterative
@@ -160,5 +159,130 @@ public class SpliteratorMain {
 
     /*
     Making the WordCounter Work in Parallel
+
+    You  could  try  to  speed  up  the  word-counting  operation  using  a  parallel  stream,
+    as follows:
+            System.out.println("Found " + countWords(stream.parallel()) + " words");
+
+    Unfortunately, this time the output is
+            Found 25 words
+
+    Evidently something has gone wrong, but what? The problem isn’t hard to discover.Because the
+    original String is split at arbitrary positions, sometimes a word is divided in  two  and  then
+    counted  twice.  In  general,  this  demonstrates  that  going  from  a sequential  stream  to  a
+    parallel  one  can  lead  to  a  wrong  result  if  this  result  may  be affected by the position
+    where the stream is split. How can you fix this issue? The solution consists of ensuring that the
+    String isn’t split at a random position but only at the end of a word. To do this, you’ll have to
+    implement a Spliterator of Character that splits a String only between two words(as shown in the
+    following listing) and then creates the parallel stream from it.
      */
+
+    static class WordCounterSpliterator implements Spliterator<Character> {
+        private final String string;
+        private int currentChar = 0;
+
+        WordCounterSpliterator(String string) {
+            this.string = string;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Character> action) {
+            action.accept(string.charAt(currentChar++));
+            // returns true if there are further characters to be consumed
+            return currentChar < string.length();
+        }
+
+        @Override
+        public Spliterator<Character> trySplit() {
+            int currentSize = string.length() - currentChar;
+            if (currentSize < 10) {
+                // returns null to signal that the String to be parsed is small enough to be processed sequentially
+                return null;
+            }
+            // Sets the candidate split position to be half of the string to be parsed
+            for (int splitPos = currentSize / 2 + currentChar;
+                    splitPos < string.length(); splitPos++) {
+                if (Character.isWhitespace((string.charAt(splitPos)))) { // advances the split position until the next space
+                    Spliterator<Character> spliterator =
+                            new WordCounterSpliterator(string.substring(currentChar, splitPos));
+                    currentChar = splitPos;
+                    return spliterator;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return string.length() - currentChar;
+        }
+
+        @Override
+        public int characteristics() {
+            return ORDERED + SIZED + SUBSIZED + NONNULL + IMMUTABLE;
+        }
+    }
+
+    /*
+    This Spliterator is created from the String to be parsed and iterates over its Characters by
+    holding the index of the one currently being traversed. Let's quickly revisit the methods of the
+    WordCounterSpliterator implementing the Spliterator interface:
+
+        - The tryAdvance method feeds the Consumer with the Character in the String at the current
+        index position and increments this position. The Consumer passed as its argument is an internal
+        Java class forwarding the consumed Character to the set of functions that have to be applied it
+        while traversing the stream, which this case only a reduction function, namely the accumulate
+        method of the WordCounter class. The tryAdvance method returns true if the new cursor position
+        is less than the total String length and there are further Characters to be iterated.
+
+        - The trySplit method is the most important one in a Spliterator, because it’s the one
+        defining the logic used to split the data structure to be iterated. As you did  in  the
+        compute  method  of  the  RecursiveTask  implemented  in  listing  7.1,the first thing you
+        have to do here is set a limit under which you don’t want to perform further splits. Here, you
+        use a low limit of 10 Characters only to make sure that your program will perform some splits
+        with the relatively short String you’re parsing. But in real-world applications you’ll have to
+        use a higher limit, as  you  did  in  the  fork/join  example,  to  avoid  creating  too
+        many  tasks.  If  the number of remaining Characters to be traversed is under this limit, you
+        return null to signal that no further split is necessary. Conversely, if you need to per-form
+        a split, you set the candidate split position to the half of the String chunk remaining to be
+        parsed.  But  you  don’t  use  this  split  position  directly  because you want to avoid
+        splitting in the middle of a word, so you move forward until you find a blank Character. Once
+        you find an opportune split position, you create  a  new  Spliterator  that  will  traverse
+        the  substring  chunk  going  from  the current position to the split one; you set the current
+        position of this to the split one, because the part before it will be managed by the new
+        Spliterator, and then you return it.
+
+        - The estimatedSize of elements still to be traversed is the difference between the total
+        length of the String parsed by this Spliterator and the position currently iterated.
+
+        - Finally,  the  characteristics  method  signals  to  the  framework  that  thisSpliterator
+        is  ORDERED  (the  order  is  the  sequence  of  Characters  in  theString), SIZED (the value
+        returned by the estimatedSize  method  is  exact), SUBSIZED (the other Spliterators created by
+        the trySplit method also have an exact size), NON-NULL (there can be no nullCharacters in the
+        String), andIMMUTABLE  (no  further  Characters  can  be  added  while  parsing  the
+        String because the String itself is an immutable class).
+     */
+
+    static Spliterator<Character> spliterator = new WordCounterSpliterator(SENTENCE);
+    static Stream<Character> stream2 = StreamSupport.stream(spliterator, true);
+    /*
+    The second boolean argument passed to the StreamSupport.stream factory method means that you want
+    to create a parallel stream. Passing this parallel stream to the countWords method produces the
+    correct output, as expected:
+
+        Found 19 words
+
+    You've seen how a Spliterator can let you to gain control over the policy used to split a data
+    structure. One last notable feature of Spliterators is the possibility of binding the source of
+    the elements to be traversed at the point of first traversal, first split, or first query for
+    estimated size, rather than at the time of its creation. When this happens, it's called a
+    late-binding Spliterator. We've dedicated appendix C to showing how you can develop a utility
+    class capable of performing multiple operations on the same stream in parallel using this feature.
+     */
+
+    public static void main(String[] args) {
+        System.out.println("Found " + countWordsIteratively(SENTENCE) + " words");
+        System.out.println("Found " + countWords(stream) + " words: Stream<Character>");
+        System.out.println("Found " + countWords(stream2) + " words: ParallelStream<Character>");
+    }
 }
