@@ -3,9 +3,8 @@ package com.besimgurbuz.collectionEnhancements;
 import com.besimgurbuz.models.Dish;
 import com.besimgurbuz.models.Transaction;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Besim Gurbuz
@@ -61,7 +60,7 @@ public class WorkingWithListAndSet {
             - The Iterator object, which is querying the source by using next() and hasNext()
             - The Collection object itself, which is removing the element by calling remove()
 
-        As a result, the sate of the iterator is no longer synced with the state of the collection, and
+        As a result, the state of the iterator is no longer synced with the state of the collection, and
         vice versa. To solve this problem, you have to use the Iterator object explicitly and call its
         remove method:
          */
@@ -81,5 +80,37 @@ public class WorkingWithListAndSet {
         menu.removeIf(dish ->
                 Character.isDigit(dish.getName().charAt(0)));
         System.out.println(menu);
+
+        // replaceAll
+        /*
+        The replaceAll method on the List interface lets you replace each element in a list with a new
+        one. Using the Streams API, you could solve this problem as follows:
+         */
+        List<String> referenceCodes = Arrays.asList("a12", "C14", "b13");
+
+        referenceCodes.stream()
+                .map(code -> Character.toUpperCase(code.charAt(0)) + code.substring(1))
+                .collect(Collectors.toList())
+                .forEach(System.out::println);
+        System.out.println("referenceCodes" + referenceCodes);
+        /*
+        This code results in a new collection of strings, however. You want a way to update the
+        existing collection. You can use a ListIterator object as follows (supporting set() method
+        to replace an element):
+         */
+        for (ListIterator<String> iterator = referenceCodes.listIterator();
+            iterator.hasNext(); ) {
+            String code = iterator.next();
+            iterator.set(Character.toUpperCase(code.charAt(0)) + code.substring(1));
+        }
+        System.out.println(referenceCodes);
+
+        /*
+        As you can see, this code is fairly verbose. In addition, as we explained earlier,
+        using Iterator objects in conjunction with collection objects can be error-prone by
+        mixing iteration and modification of the collection. In Java 8, you can simply write:
+         */
+        referenceCodes.replaceAll(code ->
+                Character.toUpperCase(code.charAt(0)) + code.substring(1));
     }
 }
