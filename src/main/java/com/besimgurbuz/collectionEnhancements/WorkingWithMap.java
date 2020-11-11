@@ -233,13 +233,57 @@ public class WorkingWithMap {
                 Map.entry("Teo", "Star Wars"),
                 Map.entry("Cristina", "James Bond"));
         Map<String, String> friends = Map.ofEntries(
-                Map.entry("Raphael", "Star Wars"));
+                Map.entry("Raphael", "Star Wars"),
+                Map.entry("Cristina", "Remember Me"));
 
         Map<String, String> everyone = new HashMap<>(family);
         everyone.putAll(friends);
         System.out.println(everyone);
 
+        /*
+        This code works expected as long as you don't have duplicate keys. If you require more flex-
+        ibility in how values are combines, you can use the new merge method. This method takes a
+        BiFunction to merge values that have a duplicate key. Suppose that Cristine is in both the
+        family and friends maps but with different associated movies:
+         */
+        Map<String, String> family2 = Map.ofEntries(
+                Map.entry("Teo", "Star Wars"), Map.entry("Cristina", "James Bond"));
+        Map<String, String> friends2 = Map.ofEntries(
+                Map.entry("Raphael", "Star Wars"), Map.entry("Cristina", "Matrix"));
 
+        /*
+        Then you could use the merge method in combination with forEach to provide a way to deal
+        with the conflict. The following code concatenates the string names of the two movies:
+         */
+        Map<String, String> everyone2 = new HashMap<>(family);
+        friends2.forEach((k, v) ->
+                everyone2.merge(k, v, (movie1, movie2) -> String.format("%s & %s", movie1, movie2)));
+
+        System.out.println(everyone2);
+
+        /*
+        You can also use merge to implement initialization checks. Suppose that you have a Map for
+        recording how many times a movie is watched. You need to check that the key representing the
+        movie is in the map before you can increment its value:
+         */
+
+        Map<String, Long> moviesToCount = new HashMap<>();
+        String movieName = "JamesBond";
+        Long count = moviesToCount.get(movieName);
+
+        if (count == null) {
+            moviesToCount.put(movieName, 1L);
+        } else {
+            moviesToCount.put(movieName, count + 1L);
+        }
+        // With what i learned this section
+//        moviesToCount.putIfAbsent(movieName, 1L);
+//        moviesToCount.computeIfPresent(movieName, (k, v) -> v + 1L);
+
+        // This code can be rewritten as:
+        moviesToCount.merge(movieName, 1L, (k, c) -> c + 1L);
+
+        System.out.println(moviesToCount);
     }
 
 }
