@@ -1,11 +1,15 @@
 package com.besimgurbuz.refactoringTestingAndDebugging;
 
-import com.besimgurbuz.refactoringTestingAndDebugging.mockData.Customer;
-import com.besimgurbuz.refactoringTestingAndDebugging.mockData.MockData;
+import com.besimgurbuz.refactoringTestingAndDebugging.mockData.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 public class RefactoringDesignPatternsWithLambdas {
     /*
@@ -265,4 +269,155 @@ public class RefactoringDesignPatternsWithLambdas {
         and the like. In those situations, you should stick with classes.
          */
     }
+
+    // Chain of responsibility
+    public static class ChainOfResponsibilityPattern {
+        /*
+        The chain of responsibility pattern is a common solution to create a chain of processing objects (such as
+        chain of operations). One processing object may do some work and pass the result to another object, which
+        also does some work and passes it on to yet another processing object, and so on.
+
+        Generally, this pattern is implemented by defining an abstract class representing a processing object that
+        defines a field to keep track of a successor. When it finishes its work, the processing object hands over its
+        work to its successor. The code looks like this:
+         */
+        public static abstract class ProcessingObject<T> {
+            protected ProcessingObject<T> successor;
+            public void setSuccessor(ProcessingObject<T> successor) {
+                this.successor = successor;
+            }
+
+            public T handle(T input) {
+                T r = handleWork(input);
+                if (successor != null) {
+                    return successor.handle(r);
+                }
+                return r;
+            }
+            abstract protected T handleWork(T input);
+        }
+
+        /*
+        The handle method provides an outline for dealing with a piece of work.
+
+        Example:
+         */
+        public static class HeaderTextProcessing extends ProcessingObject<String> {
+            @Override
+            protected String handleWork(String text) {
+                return "From Raoul, Mario and Alan: " + text;
+            }
+        }
+
+        public static class SpellCheckerProcessing extends ProcessingObject<String> {
+            @Override
+            protected String handleWork(String text) {
+                return text.replaceAll("labda", "lambda");
+            }
+        }
+
+        public static void main(String[] args) {
+            ProcessingObject<String> p1 = new HeaderTextProcessing();
+            ProcessingObject<String> p2 = new SpellCheckerProcessing();
+
+            p1.setSuccessor(p2);
+            String result = p1.handle("Arent' labdas really sexy?");
+            System.out.println(result);
+
+            // Using lambda expressions
+            /*
+            You can represent the processing objects as an instance of Function<String, String>, or (more
+            precisely) a UnaryOperator<String>. To chain them, compose these functions by using the andThen
+            method:
+             */
+            UnaryOperator<String> headerP =
+                    (String text) -> "From beautiful Izmir: " + text;
+            UnaryOperator<String> spellCheckerP =
+                    (String text) -> text.replaceAll("labda", "lambda");
+
+            Function<String, String> pipeline =
+                    headerP.andThen(spellCheckerP);
+            String r2= pipeline.apply("Aren't labdas really sexy?!!");
+            System.out.println(r2);
+        }
+    }
+
+    // Factory
+    public static class FactoryPattern {
+        /*
+        The factory design pattern lets you create objects without exposing the instantiation logic to the client.
+        Suppose that you're working for a bank that needs a way of creating different financial products: loans,
+        bonds, stocks, and so on.
+
+        Typically, you'd create a Factory class with a method that's responsible for the creation of different
+        objects, as shown here:
+         */
+        public static class ProductFactory {
+            public static Product createProduct(String name) {
+                return switch (name) {
+                    case "loan" -> new Loan(1, "Loan");
+                    case "stock" -> new Stock(2, "Stock");
+                    case "bond" -> new Bond(3, "Bond");
+                    default -> throw new RuntimeException("No such product " + name);
+                };
+            }
+        }
+    }
+
+    /*
+    Here, Loan, Stock, and Bond are subtypes of Product. The createProduct method could have additional logic to
+    configure each created product. But the benefit is that you can create these objects without exposing the
+    constructor and the configuration to the client, which makes the creation of products simpler for the client,
+    as follows:
+     */
+
+    final static Map<String, Supplier<Product>> map = new HashMap<>();
+    static {
+        map.put("loan", Loan::new);
+        map.put("stock", Stock::new);
+        map.put("bond", Bond::new);
+    }
+
+    public static void main(String[] args) {
+        Product p = FactoryPattern.ProductFactory.createProduct("loan");
+        System.out.println(p.getName());
+
+        // Using Lambda Expressions
+        // Here's how to refer to the Loan constructor:
+        Supplier<Product> loanSupplier = Loan::new;
+        Loan loan = (Loan) loanSupplier.get();
+
+        /*
+        Using this technique, you could rewrite the preceding code by creating a Map that maps product name to its
+        constructor like above static block
+
+        You can use this Map to instantiate different products, as you did with the factory design pattern: take
+        a look at createProduct
+
+        This technique is a neat way to use this Java 8 feature to achieve the same intent as the factory pattern.
+        But this technique doesn't scale well if the factory method createProduct needs to take multiple arguments
+        to pass to the product constructor. You'd have to provide a functional interface other than a simple
+        Supplier.
+
+        Suppose that you want to refer to constructors for products three arguments (two Integers and a String);
+        you need to create a special functional interface TriFunction to support such constructors. As a result,
+        the signature of the Map becomes more complex:
+
+        public interface TriFunction<T, U, V, R> {
+            R apply(T t, U u, V v);
+        }
+
+        Map<String, TriFunction<Integer, Integer, String, Product>> map = new HashMap();
+
+        You've seen how to write and refactor code by using lambda expressions. In the next section, you see how
+        to ensure that your new code is correct.
+         */
+    }
+
+    public static Product createProduct(String name) {
+        Supplier<Product> p = map.get(name);
+        if (p != null) return p.get();
+        throw new IllegalArgumentException("No such product " + name);
+    }
+
 }
