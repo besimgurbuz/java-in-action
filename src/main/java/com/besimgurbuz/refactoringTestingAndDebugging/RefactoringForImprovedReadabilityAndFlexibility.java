@@ -1,9 +1,5 @@
 package com.besimgurbuz.refactoringTestingAndDebugging;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class RefactoringForImprovedReadabilityAndFlexibility {
     /*
     From the start of this book, we've argued that lambda expressions let you write more concise and flexible code.
@@ -21,6 +17,6 @@ public class RefactoringForImprovedReadabilityAndFlexibility {
 
     // Improving code readability
     public static void main(String[] args) {
-       ImprovingCodeReadability.main(args);
+       ImprovingCodeReadabilityAndFlexibility.main(args);
     }
 }

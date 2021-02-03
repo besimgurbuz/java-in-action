@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class ImprovingCodeReadability {
-    ImprovingCodeReadability() throws IOException {
+public class ImprovingCodeReadabilityAndFlexibility {
+    ImprovingCodeReadabilityAndFlexibility() throws IOException {
     }
    /*
         What does it mean improve the readability of code? Defining good readability can be subjective. The general
