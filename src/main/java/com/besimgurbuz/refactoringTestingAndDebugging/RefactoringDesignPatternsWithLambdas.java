@@ -3,6 +3,8 @@ package com.besimgurbuz.refactoringTestingAndDebugging;
 import com.besimgurbuz.refactoringTestingAndDebugging.mockData.Customer;
 import com.besimgurbuz.refactoringTestingAndDebugging.mockData.MockData;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RefactoringDesignPatternsWithLambdas {
@@ -151,5 +153,116 @@ public class RefactoringDesignPatternsWithLambdas {
         }
 
         // This example shows how lambda expressions can help you remove the boilerplate inherent to design patterns
+    }
+
+    // Observer
+    public static class ObserverPattern {
+        /*
+        The observer design pattern is a common solution when an object (called the subject) needs to
+        automatically notify a list fo other objects (called observers) when some event happens (such as state
+        change). You typically come across this pattern when working with GUI applications. You register a set of
+        observers on a GUI component such as a button. If the button is clicked, the observers are notified and can
+        execute a specific action. But the observer pattern isn't limited to GUIs. The observer design pattern is
+        also suitable in a situation in which several traders (observers) want to react to the change of price of a
+        stock (subject).
+
+            Subject + notifyObserver()      <>------->      Observer + notify()     <----------   ConcreteObserverB
+                                                                    ^-------------       ConcreteObserverA
+        Let's write an example; The concept is simple: several newspaper agencies (The New York Times, The
+        Guardian, and Le Monde) are subscribed to a feed of news tweets and may want to receive a notification
+        if a tweet contains a particular keyword.
+
+        First, you need an Observer interface that groups the observers. It has one method, called notify, that will
+        be called by the subject (Feed) when a new tweet is available:
+         */
+
+        interface Observer {
+            void notify(String tweet);
+        }
+        /*
+        Now you can declare different observers (here, the three newspapers) that produce a different action for
+        each different keyword contained in a tweet:
+         */
+
+        static class NYTimes implements Observer {
+            public void notify(String tweet) {
+                if(tweet != null && tweet.contains("money")){
+                    System.out.println("Breaking news in NY! " + tweet);
+                }
+            }
+        }
+        static class Guardian implements Observer {
+            public void notify(String tweet) {
+                if(tweet != null && tweet.contains("queen")){
+                    System.out.println("Yet more news from London... " + tweet);
+                }
+            }
+        }
+        static class LeMonde implements Observer {
+            public void notify(String tweet) {
+                if(tweet != null && tweet.contains("wine")){
+                    System.out.println("Today cheese, wine and news! " + tweet);
+                }
+            }
+        }
+
+        // You're still missing the crucial part: the subject. Define an interface for the subject:
+        interface Subject {
+            void registerObserver(Observer o);
+            void notifyObservers(String tweet);
+        }
+
+        /*
+        The subject can register a new observer using the registerObserver method and notify his observers of a
+        tweet with the notifyObservers method. Now implement the Feed class:
+         */
+
+        static class Feed implements Subject {
+            private final List<Observer> observers = new ArrayList<>();
+            @Override
+            public void registerObserver(Observer o) {
+                observers.add(o);
+            }
+
+            @Override
+            public void notifyObservers(String tweet) {
+                observers.forEach(observer -> observer.notify(tweet));
+            }
+
+            public void clearObservers() {
+                observers.clear();
+            }
+        }
+
+        public static void main(String[] args) {
+            Feed f = new Feed();
+            f.registerObserver(new NYTimes());
+            f.registerObserver(new Guardian());
+            f.registerObserver(new LeMonde());
+            f.notifyObservers("The queen said her favourite book is Modern Java in Action!");
+
+            // Using lambda expressions:
+            f.clearObservers();
+            f.registerObserver((String tweet) -> {
+                if (tweet != null && tweet.contains("money")) {
+                    System.out.println("Breaking news in NY! " + tweet);
+                }
+            });
+
+            f.registerObserver((String tweet) -> {
+                if (tweet != null && tweet.contains("queen")) {
+                    System.out.println("Yet more news from London... " + tweet);
+                }
+            });
+
+            f.notifyObservers("Bitcoin is earning investors a lot of money!");
+        }
+
+        /*
+        Should you use lambda expressions all the time? The answer is no. In the example we described, lambda
+        expressions work great because the behavior to execute is simple, so they’re helpful for removing
+        boilerplate code. But the observers may be more complex; they could have state, define several methods,
+        and the like. In those situations, you should stick with classes.
+         */
     }
 }
