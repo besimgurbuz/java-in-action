@@ -1,5 +1,10 @@
 package com.besimgurbuz.refactoringTestingAndDebugging;
 
+import com.besimgurbuz.refactoringTestingAndDebugging.mockData.Customer;
+import com.besimgurbuz.refactoringTestingAndDebugging.mockData.MockData;
+
+import java.util.function.Consumer;
+
 public class RefactoringDesignPatternsWithLambdas {
     /*
     In this section, we explore five design patterns:
@@ -91,5 +96,60 @@ public class RefactoringDesignPatternsWithLambdas {
             System.out.println(case1 + " is numeric -> " + b1);
             System.out.println(case2 + " is all lower case -> " + b2);
         }
+    }
+
+    // Template Method
+    public static class TemplateMethodPattern {
+        /*
+        The template method design pattern is a common solution when you need to represent the outline of an
+        algorithm and have the additional flexibility to change certain parts of it. Ok, this pattern sounds a bit
+        abstract. In other words, the template method pattern is useful when you find yourself saying "I'd love
+        to use this algorithm, but I need to change a few lines so it does what I want."
+
+        Here's an example of how this pattern works. Suppose that you need to write a simple online banking app.
+        Users typically enter a customer ID; the application fetches the customer's details from the bank's
+        database and does something to make the customer happy. Different online banking applications for different
+        banking branches may have different ways of making a customer happy (such as adding a bonus to his account
+        or sending him less paperwork). You can write the following abstract class to represent the online banking
+        application:
+         */
+        abstract static class OnlineBanking {
+            public void processCustomer(int id) {
+                Customer c = MockData.Customers.getCustomerById(id);
+                makeCustomerHappy(c);
+            }
+
+            abstract void makeCustomerHappy(Customer c);
+        }
+        /*
+        The processCustomer method provides a sketch for the online banking algorithm: Fetch the customer given its
+        ID and make the customer happy. Now different branches can provide different implementations of the
+        makeCustomerHappy method by subclassing the OnlineBanking class.
+         */
+
+        // Using Lambda Expressions
+        /*
+        You can tackle the same problem (creating an outline of an algorithm and letting implementers plug in some
+        parts) by using you favorite lambdas. The components of the algorithms you want to plug in can be
+        represented by lambda expressions or method references.
+
+        Here, we introduce a second argument to the processCustomer method of type Consumer<Customer> because it
+        matches the signature of the method makeCustomerHappy defined earlier:
+         */
+        public static class OnlineBankingLambda {
+            public void processCustomer(int id, Consumer<Customer> makeCustomerHappy) {
+                Customer c = MockData.Customers.getCustomerById(id);
+                makeCustomerHappy.accept(c);
+            }
+        }
+        /* Now you can plug in different behaviors directly without subclassing the OnlineBanking class by passing
+        lambda expressions:
+         */
+
+        public static void main(String[] args) {
+            new OnlineBankingLambda().processCustomer(2, (Customer c) -> System.out.println("Hello " + c.getName()));
+        }
+
+        // This example shows how lambda expressions can help you remove the boilerplate inherent to design patterns
     }
 }
