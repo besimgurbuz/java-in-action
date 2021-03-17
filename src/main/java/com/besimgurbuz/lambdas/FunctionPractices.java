@@ -1,5 +1,7 @@
 package com.besimgurbuz.lambdas;
 
+import com.besimgurbuz.models.Person;
+
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -26,31 +28,6 @@ public class FunctionPractices {
      *  - And you want to filter adult people after you want take just first names from there names.
      *  - Let's solve this scenario!
      */
-    public static class Person {
-        private Integer age;
-        private String name;
-
-        public Person(Integer age, String name) {
-            this.age = age;
-            this.name = name;
-        }
-
-        public Integer getAge() {
-            return age;
-        }
-
-        public void setAge(Integer age) {
-            this.age = age;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
 
 
     public static void main(String[] args) {
