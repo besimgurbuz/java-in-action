@@ -1,0 +1,12 @@
+ERROR NullPointerException
+INFO THIS IS A INFO
+WARN WARNING about
+ERROR BadRequest
+INFO ACXj
+WARN Exception
+INFO THIS IS A INFO
+WARN WARNING about
+ERROR IOException
+INFO THIS IS A INFO
+WARN WARNING about
+ERROR DataSourceException
