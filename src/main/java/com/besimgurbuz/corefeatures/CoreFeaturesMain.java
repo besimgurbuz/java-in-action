@@ -141,7 +141,7 @@ public class CoreFeaturesMain {
         }
         return result;
     }
-    // AFTER YOUR CODE SOMEONE WANT TO FILTER BY WEIGHT AND SEE YOUR CODE AND Copy Pasted it...
+    // AFTER YOUR CODE SOMEONE WANTS TO FILTER BY WEIGHT AND SEE YOUR CODE AND Copied and pasted it...
     public static List<Apple> filterHeavyApples(List<Apple> inventory) {
         List<Apple> result = new ArrayList<>();
         for (Apple apple :

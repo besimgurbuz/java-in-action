@@ -76,9 +76,35 @@ public class Quiz2Dot1 {
         inventory.add(new Apple(200, Color.RED));
         inventory.add(new Apple(120, Color.RED));
         inventory.add(new Apple(230, Color.GREEN));
+        System.out.println("--FANCY--");
         prettyPrintApple(inventory, new AppleFancyFormatter());
+        System.out.println("--SIMPLE--");
+        prettyPrintApple(inventory, new AppleSimpleFormatter());
+        System.out.println("--LAMBDA #1--");
         prettyPrintApple(inventory, (a) -> "An apple color of " + a.getColor());
-
+        System.out.println("--LAMBDA #2--");
         prettyPrintApple(inventory, (Apple apple) -> apple.getWeight() + "g " + apple.getColor() + " apple.");
+    }
+
+    static class MeaningOfThis {
+        public final int value = 4;
+
+        public void doIt() {
+            int value = 6;
+            Runnable r = new Runnable() {
+                public final int value = 5;
+                @Override
+                public void run() {
+                    int value = 10;
+                    System.out.println(this.value);
+                }
+            };
+            r.run();
+        }
+
+        public static void main(String[] args) {
+            MeaningOfThis m = new MeaningOfThis();
+            m.doIt();
+        }
     }
 }
