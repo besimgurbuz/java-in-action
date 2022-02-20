@@ -6,7 +6,6 @@ import java.io.IOException;
 /**
  * @author Besim Gurbuz
  */
-
 @FunctionalInterface
 public interface BufferedReaderProcessor {
 

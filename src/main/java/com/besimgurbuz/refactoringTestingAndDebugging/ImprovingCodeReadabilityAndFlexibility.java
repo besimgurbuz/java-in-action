@@ -9,7 +9,7 @@ public class ImprovingCodeReadabilityAndFlexibility {
     }
    /*
         What does it mean improve the readability of code? Defining good readability can be subjective. The general
-    view is that the terms means "how easily this code can be understood by another human." Improving code
+    view is that the term means "how easily this code can be understood by another human." Improving code
     readability ensures that your code is understandable and maintainable by people other than you. You can take a
     few steps to make sure that your code is understandable and follows coding standards.
 
@@ -64,7 +64,7 @@ public class ImprovingCodeReadabilityAndFlexibility {
    context of overloading. Indeed, the type of anonymous class is explicit at instantiation, but the type of
    the lambda depends on its context. Here's an example of how this situation can be problematic. Suppose that
    you've declared a functional interface with the same signature as Runnable, here called Task (as might occur
-   when you ned more-meaningful interface names in your domain model):
+   when you need more-meaningful interface names in your domain model):
 
    interface Task {
         public void execute();
@@ -121,7 +121,7 @@ public class ImprovingCodeReadabilityAndFlexibility {
 
    In addition, consider using helper static methods such as comparing and maxBy whenever possible. These
    methods were designed for use with method references! Indeed, this code states much more clearly its intent
-   than than its counterpart using a lambda expression, as we showed you in chapter 3:
+   than its counterpart using a lambda expression, as we showed you in chapter 3:
 
    inventory.sort(
         (Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight()));

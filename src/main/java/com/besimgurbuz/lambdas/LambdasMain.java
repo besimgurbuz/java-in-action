@@ -78,7 +78,7 @@ public class LambdasMain {
     // after creating BufferedReaderProcessor functional interface we can use lambda expression
 
     public static String processFile(BufferedReaderProcessor processor) throws IOException {
-        String filePath = "src/com/besimgurbuz/lambdas/data.txt";
+        String filePath = "src/main/java/com/besimgurbuz/lambdas/data.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             return processor.process(br); // process the bufferedReader object
         }
